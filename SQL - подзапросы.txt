@@ -1,0 +1,47 @@
+1.
+Select product_name, units_in_stock
+FROM products
+Where units_in_stock < All (
+Select AVG(quantity) 
+FROM order_details
+Group By product_id
+)
+Order by units_in_stock Desc;
+
+2.
+Select customer_id, AVG (freight) AS freight_avg
+From orders
+Group By customer_id;
+
+Select customer_id, SUM(freight) AS freight_sum
+From orders AS o
+Inner Join (Select customer_id, AVG (freight) AS freight_avg
+            From orders
+            Group By customer_id) AS oa
+Using(customer_id)
+Where freight > freight_avg AND shipped_date Between '1996-07-16' ANd '1996-07-31'
+Group By customer_id
+Order by freight_sum;
+
+3.
+(Select order_id, SUM (unit_price * quntity - unit_price * quntity * discount) AS order_price
+From order_details
+Group By order_id) AS od
+
+Select customer_id, ship_country, order_price
+From orders 
+Join (Select order_id, SUM (unit_price * quantity - unit_price * quantity * discount) AS order_price
+      From order_details
+      Group By order_id) AS od
+Using (order_id)
+Where ship_country IN ('Bolivia', 'Brazil','Chile')
+And order_date >= '1997-09-01'
+Order By order_price Desc
+Limit 3;
+
+4.
+Select product_name
+From products
+Where product_id = ANY (
+Select product_id From order_details Where quantity =10
+);
